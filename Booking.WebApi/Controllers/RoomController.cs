@@ -14,20 +14,43 @@ namespace Booking.WebApi.Controllers
         };
 
         [HttpGet]
-        public List<Room> GetAllRooms()
+        public IActionResult GetAllRooms( [FromQuery] int? roomId = null, string roomType = null, bool? isAvailable = null)
         {
-            if (rooms.Count == 0)
+            List<Room> filteredRooms = rooms;
+            if (roomId.HasValue)
             {
-                return null;
+                filteredRooms.Where(room => room.RoomId == roomId.Value);
             }
-            return rooms;
+            if (!string.IsNullOrEmpty(roomType))
+            {
+                filteredRooms.Where(room => room.RoomType.ToLower() == roomType.ToLower());
+            }
+            if (isAvailable.HasValue)
+            {
+                filteredRooms.Where(room => room.IsAvailable == isAvailable.Value);
+            }
+            if (filteredRooms.Count == 0)
+            {
+                return NotFound("No matching rooms found.");
+            }
+
+            return Ok(filteredRooms.ToList());
         }
 
 
         [HttpGet("{RoomId}")]
-        public Room GetRoomById(int roomId)
+        public IActionResult GetRoomById(int roomId)
         {
-            return rooms.FirstOrDefault(room => room.RoomId == roomId);
+            if(roomId <= 0)
+            {
+                return BadRequest("There is no such a room.");
+            }
+            Room room = rooms.FirstOrDefault(room => room.RoomId == roomId);
+            if (room == null)
+            {
+                return NotFound("There is no rooms.");
+            }
+            return Ok(room);
         }
 
 
@@ -41,39 +64,44 @@ namespace Booking.WebApi.Controllers
 
 
         [HttpPut("{RoomId}")]
-        public Room PutUpdateRoom(int roomId, [FromBody] Room updatedRoom)
+        public IActionResult PutUpdateRoom(int roomId, [FromBody] Room updatedRoom)
         {
+            if(roomId <= 0)
+            {
+                return BadRequest("There is no rooms.");
+            }
+            if (updatedRoom == null)
+            {
+                return BadRequest("Updated room data is required.");
+            }
             Room room = rooms.FirstOrDefault(r => r.RoomId == roomId);
-
             if (room == null){
                 return null;
             }
+
             room.Capacity = updatedRoom.Capacity;
             room.IsAvailable = updatedRoom.IsAvailable;
             
-            return room;
+            return Ok(room);
         }
 
         [HttpDelete("{RoomId}")]
-        public Room DeleteRoom(int roomId)
+        public IActionResult DeleteRoom(int roomId)
         {
+            if(roomId <= 0)
+            {
+                return BadRequest("There is no rooms.");
+            }
+
             Room room = rooms.FirstOrDefault(r => r.RoomId == roomId);
             if (room == null)
             {
-                return null;
+                return NotFound("Room not found");
             }
             rooms.Remove(room);
-            return room;
+            return Ok(room);
         }
 
-        [HttpGet("available")]
-        public List<Room> GetAvailableRooms([FromQuery] bool isAvailable)
-        {
-            if(rooms.Count == 0)
-            {
-                return null;
-            }
-            return rooms.Where(room => room.IsAvailable == isAvailable).ToList();
-        }
+     
     }
 }

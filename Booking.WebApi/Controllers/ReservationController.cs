@@ -8,54 +8,104 @@ namespace Booking.WebApi.Controllers
     {
         private static List<Reservation> reservations = new List<Reservation>
         {
-            new Reservation { ReservationId = 1, RoomId = 1, FullName = "Sara Sajkovski", ReservationtDate = DateTime.Now, IsAvailable = true}
+            new Reservation { ReservationId = 1, RoomId = 1, FullName = "Osoba1", ReservationDate = DateTime.Now, IsAvailable = true},
+            new Reservation { ReservationId = 2, RoomId = 2, FullName = "Osoba2", ReservationDate = DateTime.Now, IsAvailable = false}
         };
 
         [HttpGet]
-        public List<Reservation> GetAllReservations()
+        public IActionResult GetAllReservations([FromQuery] int? reservationId = null, int? roomId = null, string? fullName = null ,bool? isActive = null)
         {
-            if (reservations.Count == 0)
+            List<Reservation> filteredReservations = reservations;
+            if (reservationId.HasValue)
             {
-                return null;
+                filteredReservations.Where(reservation => reservation.ReservationId == reservationId.Value);
             }
-            return reservations;
+            if (roomId.HasValue)
+            {
+                filteredReservations.Where(reservation => reservation.RoomId == roomId.Value);
+            }
+            if (!string.IsNullOrEmpty(fullName))
+            {
+                filteredReservations.Where(reservation => reservation.FullName.ToLower().Contains(fullName.ToLower()));
+            }
+            if (isActive.HasValue)
+            {
+                filteredReservations.Where(reservation => reservation.IsAvailable == isActive.Value);
+            }
+            if (filteredReservations.Count == 0)
+            {
+                return NotFound("No matching reservations found.");
+            }
+
+            return Ok(filteredReservations.ToList());
         }
 
+
         [HttpGet("{ReservationId}")]
-        public Reservation GetReservationById(int ReservationId)
+        public IActionResult GetReservationById(int reservationId)
         {
-            return reservations.FirstOrDefault(reservation => reservation.ReservationId == ReservationId);
+            if(reservationId <= 0)
+            {
+                return BadRequest("There is no reservations.");
+            }
+            Reservation reservation = reservations.FirstOrDefault(reservation => reservation.ReservationId == reservationId);
+            if(reservation == null)
+            {
+                return NotFound("Reservation not found.");
+            }
+            return Ok(reservation);
         }
 
         [HttpPost]
         public Reservation PostCreateNewReservation([FromBody] Reservation newReservation)
         {
-            newReservation.ReservationId = reservations.Max(reservation=>reservation.ReservationId)+1;
+            newReservation.ReservationId = reservations.Max(reservation=>reservation.ReservationId) + 1;
             reservations.Add(newReservation);
             return newReservation;
         }
 
         [HttpPut("{ReservationId}")]
-        public Reservation PutUpdateReservation(int reservationId, [FromBody] Reservation updatedReservation)
+        public IActionResult PutUpdateReservation(int reservationId, [FromBody] Reservation updatedReservation)
         {
-            Reservation reservation = reservations.FirstOrDefault(r => r.ReservationId == reservationId);
-            if (reservation == null){
-                return null;
+            if (reservationId <= 0)
+            {
+                return BadRequest("There is no reservations.");
             }
-            reservation.ReservationtDate = updatedReservation.ReservationtDate;
+            if (updatedReservation == null)
+            {
+                return BadRequest("The reservation does not have any informations.");
+            }
+
+            Reservation reservation = reservations.FirstOrDefault(reservation => reservation.ReservationId == reservationId);
+            if (reservation == null)
+            {
+                return NotFound("Reservation not found.");
+            }
+
+            reservation.RoomId = updatedReservation.RoomId;
+            reservation.FullName = updatedReservation.FullName;
+            reservation.ReservationDate = updatedReservation.ReservationDate;
             reservation.IsAvailable = updatedReservation.IsAvailable;
-            return reservation;
+
+            return Ok(reservation);
         }
 
         [HttpDelete("{ReservationId}")]
-        public Reservation DeleteReservation(int reservationId)
+        public IActionResult DeleteReservation(int id)
         {
-            Reservation reservation = reservations.FirstOrDefault(r => r.ReservationId == reservationId);
-            if (reservation == null){
-                return null;
+            if (id <= 0)
+            {
+                return BadRequest("There is no reservations.");
             }
+
+            Reservation reservation = reservations.FirstOrDefault(reservation => reservation.ReservationId == id);
+            if (reservation == null)
+            {
+                return NotFound("Reservation not found.");
+            }
+
             reservations.Remove(reservation);
-            return reservation;
+            return Ok(reservation);
         }
     }
 }
