@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Booking.WebApi.Models;
+using Microsoft.AspNetCore.Mvc;
+using Npgsql;
 
 namespace Booking.WebApi.Controllers
 {
@@ -6,109 +8,200 @@ namespace Booking.WebApi.Controllers
     [Route("[controller]")]
     public class ReservationController : ControllerBase
     {
-        private static List<Reservation> reservations = new List<Reservation>
-        {
-            new Reservation { ReservationId = 1, RoomId = 1, FullName = "Osoba1", ReservationDate = DateTime.Now, IsAvailable = true},
-            new Reservation { ReservationId = 2, RoomId = 2, FullName = "Osoba2", ReservationDate = DateTime.Now, IsAvailable = false}
-        };
+        private string connectionString = "Host=localhost;Port=5432;Database=booking;Username=postgres;Password=jk7pVHZ5";
 
         [HttpGet]
-        public IActionResult GetAllReservations([FromQuery] int? reservationId = null, int? roomId = null, string? fullName = null ,bool? isActive = null)
+        public IActionResult GetAllReservations([FromQuery] int? reservationId = null, int? roomId = null, string? fullName = null, bool? isActive = null)
         {
-            
-            IEnumerable<Reservation> filteredReservations = reservations;
-            if (reservationId.HasValue)
+            try
             {
-                filteredReservations.Where(reservation => reservation.ReservationId == reservationId.Value);
-            }
-            if (roomId.HasValue)
-            {
-                filteredReservations.Where(reservation => reservation.RoomId == roomId.Value);
-            }
-            if (!string.IsNullOrEmpty(fullName))
-            {
-                filteredReservations.Where(reservation => reservation.FullName.ToLower().Contains(fullName.ToLower()));
-            }
-            if (isActive.HasValue)
-            {
-                filteredReservations.Where(reservation => reservation.IsAvailable == isActive.Value);
-            }
 
-            List<Reservation> filteredReservationsList = filteredReservations.ToList();
-            if (filteredReservationsList.Count == 0)
-            {
-                return NotFound("No matching reservations found.");
-            }
+                List<Reservation> reservations = new List<Reservation>();
 
-            return Ok(filteredReservationsList);
+                using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
+                string commandText = @"SELECT * FROM ""Reservation"" WHERE 1 = 1";
+
+
+                using NpgsqlCommand command = new NpgsqlCommand(commandText, connection);
+
+                connection.Open();
+                using NpgsqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Reservation reservation = new Reservation
+                    {
+                        Id = reader.GetInt32(0),
+                        RoomId = reader.GetInt32(1),
+                        FullName = reader.GetString(2),
+                        ReservationDate = reader.GetDateTime(3),
+                        IsAvailable = reader.GetBoolean(4)
+                    };
+                    reservations.Add(reservation);
+                }
+                connection.Close();
+
+                List<Reservation> filteredReservations = reservations;
+                if (reservationId.HasValue)
+                {
+                    reservations.Where(reservation => reservation.Id == reservationId.Value);
+                }
+                if (roomId.HasValue)
+                {
+                    reservations.Where(reservation => reservation.RoomId == roomId.Value);
+                }
+                if (!string.IsNullOrEmpty(fullName))
+                {
+                    reservations.Where(reservation => reservation.FullName.ToLower() == fullName.ToLower());
+                }
+                if (isActive.HasValue)
+                {
+                    reservations.Where(reservation => reservation.IsAvailable == isActive.Value);
+                }
+
+                List<Reservation> filteredReservationsList = reservations.ToList();
+                if (filteredReservationsList.Count == 0)
+                {
+                    return NotFound("There is no reservations.");
+                }
+
+                return Ok(filteredReservationsList);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 
-        [HttpGet("{ReservationId}")]
+        [HttpGet("{Id}")]
         public IActionResult GetReservationById(int reservationId)
         {
-            if(reservationId <= 0)
+            try
             {
-                return BadRequest("There is no reservations.");
+                using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
+                string commandText = "SELECT * FROM \"Reservation\" WHERE id = @reservationId";
+                using NpgsqlCommand command = new NpgsqlCommand(commandText, connection);
+
+                command.Parameters.AddWithValue("@reservationId", reservationId);
+                connection.Open();
+                using NpgsqlDataReader reader = command.ExecuteReader();
+
+                bool hasData = reader.Read();
+                if (!hasData)
+                {
+                    return NotFound();
+                }
+
+                Reservation reservation = new Reservation
+                {
+                    Id = int.Parse(reader["id"].ToString()),
+                    RoomId = int.Parse(reader["room_id"].ToString()),
+                    FullName = reader["\"fullName\""].ToString(),
+                    ReservationDate = DateTime.Parse(reader["\"reservationDate\""].ToString()),
+                    IsAvailable = bool.Parse(reader["\"isAvailable\""].ToString())
+                };
+
+                connection.Close();
+                return Ok(reservation);
             }
-            Reservation reservation = reservations.FirstOrDefault(reservation => reservation.ReservationId == reservationId);
-            if(reservation == null)
+            catch (Exception ex)
             {
-                return NotFound("Reservation not found.");
+                return BadRequest(ex.Message);
             }
-            return Ok(reservation);
         }
 
         [HttpPost]
-        public Reservation PostCreateNewReservation([FromBody] Reservation newReservation)
+        public IActionResult PostCreateNewReservation([FromBody] Reservation newReservation)
         {
-            newReservation.ReservationId = reservations.Max(reservation=>reservation.ReservationId) + 1;
-            reservations.Add(newReservation);
-            return newReservation;
+            try
+            {
+                using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
+                string commandText =
+                    $"INSERT INTO \"Reservation\" (room_id, ˇ\"fullName\", \"reservationDate\", \"isAvailable\") VALUES (@roomId, @fullName, @reservationDate, @isAvailable)";
+                using NpgsqlCommand command = new NpgsqlCommand(commandText, connection);
+
+
+                command.Parameters.AddWithValue("@roomId", newReservation.RoomId);
+                command.Parameters.AddWithValue("@fullName", newReservation.FullName);
+                command.Parameters.AddWithValue("@reservationDate", newReservation.ReservationDate);
+                command.Parameters.AddWithValue("@isAvailable", newReservation.IsAvailable);
+
+                connection.Open();
+                int numberOfRowsAffected = command.ExecuteNonQuery();
+                connection.Close();
+
+                if (numberOfRowsAffected == 0)
+                {
+                    return Ok("Unfortunately, reservation failed.");
+                }
+                return Ok("Reservation successfully created");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        [HttpPut("{ReservationId}")]
+
+        [HttpPut("{Id}")]
         public IActionResult PutUpdateReservation(int reservationId, [FromBody] Reservation updatedReservation)
         {
-            if (reservationId <= 0)
+            try
             {
-                return BadRequest("There is no reservations.");
+                using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
+                string commandText =
+                    $"UPDATE \"Reservation\" SET room_id = @roomId, fullName = @fullName, reservationDate = @reservationDate, isAvailable = @isAvailable WHERE reservation_id = @reservationId";
+                using NpgsqlCommand command = new NpgsqlCommand(commandText, connection);
+
+                command.Parameters.AddWithValue("@roomId", updatedReservation.RoomId);
+                command.Parameters.AddWithValue("@fullName", updatedReservation.FullName);
+                command.Parameters.AddWithValue("@reservationDate", updatedReservation.ReservationDate);
+                command.Parameters.AddWithValue("@isAvailable", updatedReservation.IsAvailable);
+                command.Parameters.AddWithValue("@reservationId", reservationId);
+
+                connection.Open();
+                int numberOfRowsAffected = command.ExecuteNonQuery();
+                connection.Close();
+
+                if (numberOfRowsAffected == 0)
+                {
+                    return NotFound("There is no reservations.");
+                }
+                return Ok("Reservation successfully updated");
             }
-            if (updatedReservation == null)
+            catch (Exception ex)
             {
-                return BadRequest("The reservation does not have any informations.");
+                return BadRequest(ex.Message);
             }
-
-            Reservation reservation = reservations.FirstOrDefault(reservation => reservation.ReservationId == reservationId);
-            if (reservation == null)
-            {
-                return NotFound("Reservation not found.");
-            }
-
-            reservation.RoomId = updatedReservation.RoomId;
-            reservation.FullName = updatedReservation.FullName;
-            reservation.ReservationDate = updatedReservation.ReservationDate;
-            reservation.IsAvailable = updatedReservation.IsAvailable;
-
-            return Ok(reservation);
         }
 
-        [HttpDelete("{ReservationId}")]
+
+        [HttpDelete("{Id}")]
         public IActionResult DeleteReservation(int id)
         {
-            if (id <= 0)
+            try
             {
-                return BadRequest("There is no reservations.");
-            }
+                using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
+                string commandText = $"DELETE FROM \"Reservation\" WHERE id = @reservationId";
+                using NpgsqlCommand command = new NpgsqlCommand(commandText, connection);
 
-            Reservation reservation = reservations.FirstOrDefault(reservation => reservation.ReservationId == id);
-            if (reservation == null)
+                command.Parameters.AddWithValue("@reservationId", id);
+                connection.Open();
+                int numberOfRowsAffected = command.ExecuteNonQuery();
+                connection.Close();
+
+                if (numberOfRowsAffected == 0)
+                {
+                    return NotFound("There is no reservations.");
+                }
+                return Ok("Reservation successfully deleted");
+            }
+            catch (Exception ex)
             {
-                return NotFound("Reservation not found.");
+                return BadRequest(ex.Message);
             }
-
-            reservations.Remove(reservation);
-            return Ok(reservation);
         }
     }
 }
+

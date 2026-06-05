@@ -1,12 +1,13 @@
-﻿namespace Booking.WebApi
+﻿namespace Booking.WebApi.Models
 {
     public class Reservation
     {
-        public int ReservationId { get; set; } // primary key
-        public int RoomId { get; set; } // bit će foreign key prema Room 
+        public int Id { get; set; }
+        public int RoomId { get; set; }
         public string FullName { get; set; }
         public DateTime ReservationDate { get; set; }
         public bool IsAvailable { get; set; }
 
+        public Room? Room { get; set; }
     }
 }
