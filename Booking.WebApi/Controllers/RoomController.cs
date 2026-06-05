@@ -16,7 +16,7 @@ namespace Booking.WebApi.Controllers
         [HttpGet]
         public IActionResult GetAllRooms( [FromQuery] int? roomId = null, string roomType = null, bool? isAvailable = null)
         {
-            List<Room> filteredRooms = rooms;
+            IEnumerable<Room> filteredRooms = rooms;
             if (roomId.HasValue)
             {
                 filteredRooms.Where(room => room.RoomId == roomId.Value);
@@ -29,12 +29,15 @@ namespace Booking.WebApi.Controllers
             {
                 filteredRooms.Where(room => room.IsAvailable == isAvailable.Value);
             }
-            if (filteredRooms.Count == 0)
+
+            List<Room> filteredRoomsList = filteredRooms.ToList();
+
+            if (filteredRoomsList.Count == 0)
             {
                 return NotFound("No matching rooms found.");
             }
 
-            return Ok(filteredRooms.ToList());
+            return Ok(filteredRoomsList);
         }
 
 
