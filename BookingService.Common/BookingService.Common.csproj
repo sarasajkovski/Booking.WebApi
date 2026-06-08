@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Booking.Models\Booking.Models.csproj" />
+    <ProjectReference Include="..\BookingCommon\Booking.Common.csproj" />
     <ProjectReference Include="..\BookingCommon\BookingCommon.csproj" />
   </ItemGroup>
 

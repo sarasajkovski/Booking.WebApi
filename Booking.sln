@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingService.Common", "Bo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingRepository.Common", "BookingRepository.Common\BookingRepository.Common.csproj", "{E4C824C5-2907-46FB-89A4-C3FA49F410D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingCommon", "BookingCommon\BookingCommon.csproj", "{D1DAC45D-DDC9-4C17-A948-539444D2923C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Booking.Common", "BookingCommon\Booking.Common.csproj", "{D1DAC45D-DDC9-4C17-A948-539444D2923C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

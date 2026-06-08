@@ -1,5 +1,5 @@
-﻿using Booking.Models;
-using Booking.WebApi.Models;
+﻿using Booking.WebApi.Models;
+using Booking.Models;
 
 
 namespace Repository.Common
