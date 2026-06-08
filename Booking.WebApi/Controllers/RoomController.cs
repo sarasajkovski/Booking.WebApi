@@ -1,7 +1,7 @@
+using Booking.Models;
+using Booking.Service;
 using Booking.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql;
-using System.Text;
 
 namespace Booking.WebApi.Controllers
 {
@@ -9,210 +9,67 @@ namespace Booking.WebApi.Controllers
     [Route("[controller]")]
     public class RoomController : ControllerBase
     {
-        private string connectionString = "Host=localhost;Port=5432;Database=booking;Username=postgres;Password=jk7pVHZ5";
+
+        private RoomService roomService = new RoomService();
 
         [HttpGet]
-        public IActionResult GetAllRooms([FromQuery] int? Id = null, string? roomType = null, bool? isAvailable = null)
+        public IActionResult GetAllRooms([FromQuery] RoomFilter filter)
         {
-            try
+            List<Room> rooms = roomService.GetAllRooms(filter);
+            if(rooms.Count == 0)
             {
-                List<Room> rooms = new List<Room>();
-
-                using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
-                StringBuilder sb = new StringBuilder();
-
-                sb.Append(@"SELECT * FROM ""Room"" WHERE 1=1");
-                if (Id.HasValue)
-                {
-                    sb.Append(@" AND Id = @roomId");
-                }
-                if (!string.IsNullOrEmpty(roomType))
-                {
-                    sb.Append(@" AND ""roomType"" = @roomType");
-                }
-                if (isAvailable.HasValue)
-                {
-                    sb.Append(@" AND ""isAvailable"" = @isAvailable");
-                }
-                string commandText = sb.ToString();
-
-
-                using NpgsqlCommand command = new NpgsqlCommand(commandText, connection);
-
-                if (Id.HasValue)
-                {
-                    command.Parameters.AddWithValue("@roomId", Id.Value);
-                }
-
-                if (!string.IsNullOrEmpty(roomType))
-                {
-                    command.Parameters.AddWithValue("@roomType", roomType);
-                }
-
-                if (isAvailable.HasValue)
-                {
-                    command.Parameters.AddWithValue("@isAvailable", isAvailable.Value);
-                }
-
-                connection.Open();
-                using NpgsqlDataReader reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    Room room = new Room
-                    {
-                        Id = reader.GetInt32(0),
-                        Name = reader.GetString(1),
-                        Capacity = reader.GetInt32(2),
-                        RoomType = reader.GetString(3),
-                        IsAvailable = reader.GetBoolean(4)
-                    };
-                    rooms.Add(room);
-                }
-
-                connection.Close();
-                return Ok(rooms);
+                return NotFound("No rooms.");
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(rooms);
         }
 
 
-
-
         [HttpGet("{Id}")]
-        public IActionResult GetRoomById(int Id)
+        public IActionResult GetRoomById(int id)
         {
-            try
+            Room room = roomService.GetRoomById(id);
+            if (room == null)
             {
-                using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
-                string commandText = "SELECT id, name, capacity, \"roomType\", \"isAvailable\" FROM \"Room\" WHERE id = @roomId";
-                using NpgsqlCommand command = new NpgsqlCommand(commandText, connection);
-
-                command.Parameters.AddWithValue("@roomId", Id);
-
-                connection.Open();
-                using NpgsqlDataReader reader = command.ExecuteReader();
-
-                bool hasData = reader.Read();
-                if (!hasData)
-                {
-                    return NotFound();
-                }
-
-                Room room = new Room
-                {
-                    Id = reader.GetInt32(0),
-                    Name = reader.GetString(1),
-                    Capacity = reader.GetInt32(2),
-                    RoomType = reader.GetString(3),
-                    IsAvailable = reader.GetBoolean(4)
-                };
-                connection.Close();
-                return Ok(room);
+                return BadRequest();
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-
-            }
+            return Ok(room);
         }
 
 
         [HttpPost]
         public IActionResult PostCreateNewRoom([FromBody] Room newRoom)
         {
-            try
+            bool isCreated = roomService.CreateNewRoom(newRoom);
+            if ( !isCreated )
             {
-                using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
-                string commandText =
-                    "INSERT INTO \"Room\" (name, capacity, \"roomType\", \"isAvailable\") VALUES (@name, @capacity, @roomType, @isAvailable);";
-                using NpgsqlCommand command = new NpgsqlCommand(commandText, connection);
-
-                command.Parameters.AddWithValue("@id", NpgsqlTypes.NpgsqlDbType.Uuid, Guid.NewGuid());
-                command.Parameters.AddWithValue("@name", newRoom.Name);
-                command.Parameters.AddWithValue("@capacity", newRoom.Capacity);
-                command.Parameters.AddWithValue("@roomType", newRoom.RoomType);
-                command.Parameters.AddWithValue("@isAvailable", newRoom.IsAvailable);
-
-                connection.Open();
-                int numberOfRowsAffected = command.ExecuteNonQuery();
-                connection.Close();
-
-                if (numberOfRowsAffected == 0)
-                {
-                    return BadRequest("Room couldn't be added.");
-                }
-
-                return Ok("Room added successfully.");
+                return BadRequest();
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok("Room successfully created.");
         }
 
 
         [HttpPut("{Id}")]
-        public IActionResult PutUpdateRoom(int Id, [FromBody] Room updatedRoom)
+        public IActionResult PutUpdateRoom(int id, [FromBody] Room updatedRoom)
         {
-            try
+            bool isUpdated = roomService.UpdateRoom(id, updatedRoom);
+            if (!isUpdated)
             {
-                using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
-                string commandText =
-                     "UPDATE \"Room\" SET capacity = @capacity, \"isAvailable\" = @isAvailable WHERE id = @roomId";
-                using NpgsqlCommand command = new NpgsqlCommand(commandText, connection);
-
-                command.Parameters.AddWithValue("@capacity", updatedRoom.Capacity);
-                command.Parameters.AddWithValue("@isAvailable", updatedRoom.IsAvailable);
-                command.Parameters.AddWithValue("@roomId", Id);
-
-                connection.Open();
-                int numberOfRowsAffected = command.ExecuteNonQuery();
-                connection.Close();
-
-                if (numberOfRowsAffected == 0)
-                {
-                    return BadRequest("Room couldn't be updated.");
-                }
-
-                return Ok("Room successfully updated.");
+                return BadRequest();
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok("Room successfully created.");
         }
 
 
 
         [HttpDelete("{Id}")]
-        public IActionResult DeleteRoom(int Id)
+        public IActionResult DeleteRoom(int id)
         {
-            try
+            bool isDeleted = roomService.DeleteRoom(id);
+            if (!isDeleted)
             {
-                using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
-                string commandText = @"DELETE FROM ""Room"" WHERE id = @roomId";
-                using NpgsqlCommand command = new NpgsqlCommand(commandText, connection);
-
-                command.Parameters.AddWithValue("@roomId", Id);
-
-                connection.Open();
-                int numberOfRowsAffected = command.ExecuteNonQuery();
-                connection.Close();
-
-                if (numberOfRowsAffected == 0)
-                {
-                    return BadRequest("Room couldn't be deleted.");
-                }
-                return Ok("Room successfully deleted.");
+                return BadRequest();
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok("Room successfully deleted.");
         }
     }
 }
