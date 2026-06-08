@@ -127,11 +127,8 @@ namespace Booking.WebApi.Controllers
             try
             {
                 using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
-                StringBuilder sb = new StringBuilder();
-
-
                 string commandText =
-                    $"INSERT INTO \"Room\" (name, capacity, \"roomType\", \"isAvailable\") VALUES (@name, @capacity, @roomType, @isAvailable);";
+                    "INSERT INTO \"Room\" (name, capacity, \"roomType\", \"isAvailable\") VALUES (@name, @capacity, @roomType, @isAvailable);";
                 using NpgsqlCommand command = new NpgsqlCommand(commandText, connection);
 
                 command.Parameters.AddWithValue("@id", NpgsqlTypes.NpgsqlDbType.Uuid, Guid.NewGuid());
@@ -165,7 +162,7 @@ namespace Booking.WebApi.Controllers
             {
                 using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
                 string commandText =
-                     $"UPDATE \"Room\" SET capacity = @capacity, \"isAvailable\" = @isAvailable WHERE id = @roomId";
+                     "UPDATE \"Room\" SET capacity = @capacity, \"isAvailable\" = @isAvailable WHERE id = @roomId";
                 using NpgsqlCommand command = new NpgsqlCommand(commandText, connection);
 
                 command.Parameters.AddWithValue("@capacity", updatedRoom.Capacity);

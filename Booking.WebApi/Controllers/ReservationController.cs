@@ -1,6 +1,7 @@
 ﻿using Booking.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
+using System.Text;
 
 namespace Booking.WebApi.Controllers
 {
@@ -11,18 +12,51 @@ namespace Booking.WebApi.Controllers
         private string connectionString = "Host=localhost;Port=5432;Database=booking;Username=postgres;Password=jk7pVHZ5";
 
         [HttpGet]
-        public IActionResult GetAllReservations([FromQuery] int? reservationId = null, int? roomId = null, string? fullName = null, bool? isActive = null)
+        public IActionResult GetAllReservations([FromQuery] int? Id = null, int? roomId = null, string? fullName = null, bool? isAvailable = null)
         {
             try
             {
-
                 List<Reservation> reservations = new List<Reservation>();
 
                 using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
-                string commandText = @"SELECT * FROM ""Reservation"" WHERE 1 = 1";
+                StringBuilder sb = new StringBuilder();
 
-
+                sb.Append(@"SELECT * FROM ""Reservation"" WHERE 1 = 1");
+                if (Id.HasValue)
+                {
+                    sb.Append(@" AND Id = @reservationId");
+                }
+                if (roomId.HasValue)
+                {
+                    sb.Append(@"AND roomId = @roomId");
+                }
+                if(!string.IsNullOrEmpty(fullName))
+                {
+                    sb.Append(@"AND fullName = @fullName");
+                }
+                if (isAvailable.HasValue) { 
+                    sb.Append(@"AND isAvailable = @isAvailable");
+                }
+                string commandText = sb.ToString();
+                
                 using NpgsqlCommand command = new NpgsqlCommand(commandText, connection);
+
+                if (Id.HasValue)
+                {
+                    command.Parameters.AddWithValue("@reservationId", Id.Value);
+                }
+                if (roomId.HasValue)
+                {
+                    command.Parameters.AddWithValue("@roomId", roomId.Value);
+                }
+                if (!string.IsNullOrEmpty(fullName))
+                {
+                    command.Parameters.AddWithValue("@fullName", fullName);
+                }
+                if (isAvailable.HasValue)
+                {
+                    command.Parameters.AddWithValue("@isAvailable", isAvailable.Value);
+                }
 
                 connection.Open();
                 using NpgsqlDataReader reader = command.ExecuteReader();
@@ -39,33 +73,9 @@ namespace Booking.WebApi.Controllers
                     };
                     reservations.Add(reservation);
                 }
+
                 connection.Close();
-
-                List<Reservation> filteredReservations = reservations;
-                if (reservationId.HasValue)
-                {
-                    reservations.Where(reservation => reservation.Id == reservationId.Value);
-                }
-                if (roomId.HasValue)
-                {
-                    reservations.Where(reservation => reservation.RoomId == roomId.Value);
-                }
-                if (!string.IsNullOrEmpty(fullName))
-                {
-                    reservations.Where(reservation => reservation.FullName.ToLower() == fullName.ToLower());
-                }
-                if (isActive.HasValue)
-                {
-                    reservations.Where(reservation => reservation.IsAvailable == isActive.Value);
-                }
-
-                List<Reservation> filteredReservationsList = reservations.ToList();
-                if (filteredReservationsList.Count == 0)
-                {
-                    return NotFound("There is no reservations.");
-                }
-
-                return Ok(filteredReservationsList);
+                return Ok(reservations);
             }
             catch (Exception ex)
             {
@@ -84,6 +94,7 @@ namespace Booking.WebApi.Controllers
                 using NpgsqlCommand command = new NpgsqlCommand(commandText, connection);
 
                 command.Parameters.AddWithValue("@reservationId", reservationId);
+
                 connection.Open();
                 using NpgsqlDataReader reader = command.ExecuteReader();
 
@@ -118,7 +129,7 @@ namespace Booking.WebApi.Controllers
             {
                 using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
                 string commandText =
-                    $"INSERT INTO \"Reservation\" (room_id, ˇ\"fullName\", \"reservationDate\", \"isAvailable\") VALUES (@roomId, @fullName, @reservationDate, @isAvailable)";
+                    "INSERT INTO \"Reservation\" (room_id, ˇ\"fullName\", \"reservationDate\", \"isAvailable\") VALUES (@roomId, @fullName, @reservationDate, @isAvailable)";
                 using NpgsqlCommand command = new NpgsqlCommand(commandText, connection);
 
 
