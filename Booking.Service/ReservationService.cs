@@ -16,29 +16,29 @@ namespace Booking.Service
             reservationRepository = new ReservationRepository();
         }
 
-        public List<Reservation> GetAllReservations(ReservationFilter filter)
+        public async Task <List<Reservation>> GetAllReservationsAsync(ReservationFilter filter)
         {
-            return reservationRepository.GetAllReservations(filter);
+            return await reservationRepository.GetAllReservationsAsync(filter);
         }
 
-        public Reservation GetReservationById(int reservationId)
+        public async Task <Reservation> GetReservationByIdAsync(int reservationId)
         {
-            return reservationRepository.GetReservationById(reservationId);
+            return await reservationRepository.GetReservationByIdAsync(reservationId);
         }
 
-        public bool CreateNewReservation(Reservation newReservation)
+        public async Task <bool> CreateNewReservation(Reservation newReservation)
         {
-            return reservationRepository.CreateNewReservation(newReservation);
+            return await reservationRepository.CreateNewReservation(newReservation);
         }
 
-        public bool UpdateReservation(int reservationId, Reservation updatedReservation)
+        public async Task <bool> UpdateReservation(int reservationId, Reservation updatedReservation)
         {
-            return reservationRepository.UpdateReservation(reservationId, updatedReservation);
+            return await reservationRepository.UpdateReservation(reservationId, updatedReservation);
         }
 
-        public bool DeleteReservation(int reservationId)
+        public async Task <bool> DeleteReservation(int reservationId)
         {
-            return reservationRepository.DeleteReservation(reservationId);
+            return await reservationRepository.DeleteReservation(reservationId);
         }
     }
 }

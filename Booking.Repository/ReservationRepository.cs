@@ -10,7 +10,7 @@ namespace Booking.Repository
     {
         private string connectionString = "Host=localhost;Port=5432;Database=booking;Username=postgres;Password=jk7pVHZ5";
 
-        public List<Reservation> GetAllReservations(ReservationFilter filter)
+        public async Task <List<Reservation>> GetAllReservationsAsync(ReservationFilter filter)
         {
             List<Reservation> reservations = new List<Reservation>();
 
@@ -34,8 +34,8 @@ namespace Booking.Repository
             {
                 sb.Append(@"AND isAvailable = @isAvailable");
             }
-            string commandText = sb.ToString();
 
+            string commandText = sb.ToString();
             using NpgsqlCommand command = new NpgsqlCommand(commandText, connection);
 
             if (filter.Id.HasValue)
@@ -56,7 +56,7 @@ namespace Booking.Repository
             }
 
             connection.Open();
-            using NpgsqlDataReader reader = command.ExecuteReader();
+            using NpgsqlDataReader reader =await command.ExecuteReaderAsync();
 
             while (reader.Read())
             {
@@ -75,7 +75,7 @@ namespace Booking.Repository
             return reservations;
         }
 
-        public Reservation GetReservationById(int reservationId)
+        public async Task <Reservation> GetReservationByIdAsync(int reservationId)
         {
             using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
             string commandText = @"SELECT * FROM ""Reservation"" WHERE Id = @reservationId";
@@ -84,7 +84,7 @@ namespace Booking.Repository
             command.Parameters.AddWithValue("@reservationId", reservationId);
 
             connection.Open();
-            using NpgsqlDataReader reader = command.ExecuteReader();
+            using NpgsqlDataReader reader = await command.ExecuteReaderAsync();
             if (!reader.Read())
             {
                 connection.Close();
@@ -105,7 +105,7 @@ namespace Booking.Repository
         }
 
 
-        public bool CreateNewReservation(Reservation newReservation)
+        public async Task <bool> CreateNewReservation(Reservation newReservation)
         {
             using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
             string commandText =
@@ -119,13 +119,13 @@ namespace Booking.Repository
             command.Parameters.AddWithValue("@isAvailable", newReservation.IsAvailable);
 
             connection.Open();
-            int numberOfRowsAffected = command.ExecuteNonQuery();
+            int numberOfRowsAffected = await command.ExecuteNonQueryAsync();
             connection.Close();
 
             return numberOfRowsAffected > 0;
         }
 
-        public bool UpdateReservation(int reservationId, Reservation updatedReservation)
+        public async Task <bool> UpdateReservation(int reservationId, Reservation updatedReservation)
         {
             using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
             string commandText =
@@ -139,13 +139,13 @@ namespace Booking.Repository
             command.Parameters.AddWithValue("@reservationId", reservationId);
 
             connection.Open();
-            int numberOfRowsAffected = command.ExecuteNonQuery();
+            int numberOfRowsAffected = await command.ExecuteNonQueryAsync();
             connection.Close();
 
             return numberOfRowsAffected > 0;
         }
 
-        public bool DeleteReservation(int reservationId)
+        public async Task <bool> DeleteReservation(int reservationId)
         {
             using NpgsqlConnection connection = new NpgsqlConnection(connectionString);
             string commandText = $"DELETE FROM \"Reservation\" WHERE Id = @reservationId";
@@ -154,7 +154,7 @@ namespace Booking.Repository
             command.Parameters.AddWithValue("@reservationId", reservationId);
 
             connection.Open();
-            int numberOfRowsAffected = command.ExecuteNonQuery();
+            int numberOfRowsAffected = await command.ExecuteNonQueryAsync();
             connection.Close();
 
             return numberOfRowsAffected > 0;

@@ -13,9 +13,9 @@ namespace Booking.WebApi.Controllers
         private ReservationService reservationService = new ReservationService();
 
         [HttpGet]
-        public IActionResult GetAllReservations([FromQuery] ReservationFilter filter)
+        public async Task <IActionResult> GetAllReservationsAsync([FromQuery] ReservationFilter filter)
         {
-            List<Reservation> reservations = reservationService.GetAllReservations(filter);
+            List<Reservation> reservations = await reservationService.GetAllReservationsAsync(filter);
             if(reservations.Count == 0)
             {
                 return NotFound("No reservations.");
@@ -25,9 +25,9 @@ namespace Booking.WebApi.Controllers
 
 
         [HttpGet("{Id}")]
-        public IActionResult GetReservationById(int reservationId)
+        public async Task <IActionResult> GetReservationByIdAsync(int reservationId)
         {
-           Reservation reservation = reservationService.GetReservationById(reservationId);
+           Reservation reservation = await reservationService.GetReservationByIdAsync(reservationId);
             if (reservation == null)
             {
                 return NotFound("There is no reservations.");
@@ -36,9 +36,9 @@ namespace Booking.WebApi.Controllers
         }
 
         [HttpPost]
-        public IActionResult PostCreateNewReservation([FromBody] Reservation newReservation)
+        public async Task <IActionResult> PostCreateNewReservation([FromBody] Reservation newReservation)
         {
-           bool isCreated = reservationService.CreateNewReservation(newReservation);
+           bool isCreated = await reservationService.CreateNewReservation(newReservation);
             if ( !isCreated )
             {
                 return BadRequest();
@@ -48,9 +48,9 @@ namespace Booking.WebApi.Controllers
 
 
         [HttpPut("{Id}")]
-        public IActionResult PutUpdateReservation(int reservationId, [FromBody] Reservation updatedReservation)
+        public async Task <IActionResult> PutUpdateReservation(int reservationId, [FromBody] Reservation updatedReservation)
         {
-            bool isUpdated = reservationService.UpdateReservation(reservationId, updatedReservation);
+            bool isUpdated = await reservationService.UpdateReservation(reservationId, updatedReservation);
             if (!isUpdated)
             {
                 return NotFound("There is no reservations.");
@@ -60,9 +60,9 @@ namespace Booking.WebApi.Controllers
 
 
         [HttpDelete("{Id}")]
-        public IActionResult DeleteReservation(int id)
+        public async Task  <IActionResult> DeleteReservation(int id)
         {
-            bool isDeleted = reservationService.DeleteReservation(id);
+            bool isDeleted = await reservationService.DeleteReservation(id);
             if ( !isDeleted )
             {
                 return NotFound("There is no reservations.");

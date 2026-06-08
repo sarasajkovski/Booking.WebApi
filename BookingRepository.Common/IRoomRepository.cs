@@ -6,11 +6,11 @@ namespace Repository.Common
 {
     public interface IRoomRepository
     {
-        Room GetRoomById(int id);
-        bool CreateNewRoom(Room newRoom);
-        bool UpdateRoom(int id, Room room);
-        bool DeleteRoom(int id);
+        Task <Room> GetRoomByIdAsync(int id);
+        Task <bool> CreateNewRoom(Room newRoom);
+        Task <bool> UpdateRoom(int id, Room room);
+        Task <bool> DeleteRoom(int id);
 
-        List<Room> GetAllRooms(RoomFilter filter);
+        Task <List<Room>> GetAllRoomsAsync(RoomFilter filter);
     }
 }

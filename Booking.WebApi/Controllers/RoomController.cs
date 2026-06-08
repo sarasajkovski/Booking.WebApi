@@ -13,9 +13,9 @@ namespace Booking.WebApi.Controllers
         private RoomService roomService = new RoomService();
 
         [HttpGet]
-        public IActionResult GetAllRooms([FromQuery] RoomFilter filter)
+        public async Task <IActionResult> GetAllRoomsAsync([FromQuery] RoomFilter filter)
         {
-            List<Room> rooms = roomService.GetAllRooms(filter);
+            List<Room> rooms = await roomService.GetAllRoomsAsync(filter);
             if(rooms.Count == 0)
             {
                 return NotFound("No rooms.");
@@ -25,9 +25,9 @@ namespace Booking.WebApi.Controllers
 
 
         [HttpGet("{Id}")]
-        public IActionResult GetRoomById(int id)
+        public async Task <IActionResult> GetRoomByIdAsync(int id)
         {
-            Room room = roomService.GetRoomById(id);
+            Room room = await roomService.GetRoomByIdAsync(id);
             if (room == null)
             {
                 return BadRequest();
@@ -37,9 +37,9 @@ namespace Booking.WebApi.Controllers
 
 
         [HttpPost]
-        public IActionResult PostCreateNewRoom([FromBody] Room newRoom)
+        public async Task <IActionResult> PostCreateNewRoom([FromBody] Room newRoom)
         {
-            bool isCreated = roomService.CreateNewRoom(newRoom);
+            bool isCreated = await roomService.CreateNewRoom(newRoom);
             if ( !isCreated )
             {
                 return BadRequest();
@@ -49,9 +49,9 @@ namespace Booking.WebApi.Controllers
 
 
         [HttpPut("{Id}")]
-        public IActionResult PutUpdateRoom(int id, [FromBody] Room updatedRoom)
+        public async Task <IActionResult> PutUpdateRoom(int id, [FromBody] Room updatedRoom)
         {
-            bool isUpdated = roomService.UpdateRoom(id, updatedRoom);
+            bool isUpdated = await roomService.UpdateRoom(id, updatedRoom);
             if (!isUpdated)
             {
                 return BadRequest();
@@ -62,9 +62,9 @@ namespace Booking.WebApi.Controllers
 
 
         [HttpDelete("{Id}")]
-        public IActionResult DeleteRoom(int id)
+        public async Task <IActionResult> DeleteRoom(int id)
         {
-            bool isDeleted = roomService.DeleteRoom(id);
+            bool isDeleted = await roomService.DeleteRoom(id);
             if (!isDeleted)
             {
                 return BadRequest();

@@ -5,11 +5,11 @@ namespace BookingService.Common
 {
     public interface IRoomService
     {
-        Room GetRoomById(int id);
-        bool CreateNewRoom(Room room);
-        bool UpdateRoom(int id, Room room);
-        bool DeleteRoom(int id);
+        Task <Room> GetRoomByIdAsync(int id);
+        Task <bool> CreateNewRoom(Room room);
+        Task <bool> UpdateRoom(int id, Room room);
+        Task <bool> DeleteRoom(int id);
 
-        List<Room> GetAllRooms(RoomFilter filter);
+        Task <List<Room>> GetAllRoomsAsync(RoomFilter filter);
     }
 }

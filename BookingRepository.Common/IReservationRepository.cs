@@ -5,11 +5,11 @@ namespace BookingRepository.Common
 {
     public interface IReservationRepository
     {
-        Reservation GetReservationById(int id);
-        bool CreateNewReservation(Reservation reservation);
-        bool UpdateReservation(int id, Reservation reservation);
-        bool DeleteReservation(int id);
+        Task <Reservation> GetReservationByIdAsync(int id);
+        Task <bool> CreateNewReservation(Reservation reservation);
+        Task <bool> UpdateReservation(int id, Reservation reservation);
+        Task <bool> DeleteReservation(int id);
 
-        List<Reservation> GetAllReservations(ReservationFilter filter);
+        Task <List<Reservation>> GetAllReservationsAsync(ReservationFilter filter);
     }
 }

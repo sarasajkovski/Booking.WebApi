@@ -14,29 +14,29 @@ namespace Booking.Service
             roomRepository = new RoomRepository();
         }
 
-        public List<Room> GetAllRooms(RoomFilter filter)
+        public async Task<List<Room>> GetAllRoomsAsync(RoomFilter filter)
         {
-            return roomRepository.GetAllRooms(filter);
+            return await roomRepository.GetAllRoomsAsync(filter);
         }
 
-        public Room GetRoomById(int id)
+        public async Task <Room> GetRoomByIdAsync(int id)
         {
-            return roomRepository.GetRoomById(id);
+            return await roomRepository.GetRoomByIdAsync(id);
         }
 
-        public bool CreateNewRoom(Room newRoom)
+        public async Task <bool> CreateNewRoom(Room newRoom)
         {
-            return roomRepository.CreateNewRoom(newRoom);
+            return await roomRepository.CreateNewRoom(newRoom);
         }
 
-        public bool UpdateRoom(int id, Room updatedRoom)
+        public async Task <bool> UpdateRoom(int id, Room updatedRoom)
         {
-            return roomRepository.UpdateRoom(id, updatedRoom);
+            return await roomRepository.UpdateRoom(id, updatedRoom);
         }
 
-        public bool DeleteRoom(int id)
+        public async Task <bool> DeleteRoom(int id)
         {
-            return roomRepository.DeleteRoom(id);
+            return await roomRepository.DeleteRoom(id);
         }
     }
 }
