@@ -1,5 +1,4 @@
 ﻿using Booking.Common;
-
 using Booking.Models;
 using BookingService.Common;
 using Repository.Common;

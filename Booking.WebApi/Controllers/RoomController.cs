@@ -1,5 +1,7 @@
+using AutoMapper;
 using Booking.Common;
 using Booking.Models;
+using Booking.WebApi.RestModels;
 using BookingService.Common;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,22 +11,26 @@ namespace Booking.WebApi.Controllers
     [Route("[controller]")]
     public class RoomController : ControllerBase
     {
-
-        private IRoomService roomService { get; set; }
-        public RoomController(IRoomService roomServ)
+        protected IRoomService roomService { get; set; }
+        private IMapper mapper { get; set; }
+        public RoomController(IRoomService roomServ, IMapper mapper)
         {
             roomService = roomServ;
+            mapper = mapper;
         }
 
         [HttpGet]
         public async Task <IActionResult> GetAllRoomsAsync([FromQuery] RoomFilter filter)
         {
             List<Room> rooms = await roomService.GetAllRoomsAsync(filter);
-            if(rooms.Count == 0)
+            List<RoomRest> roomRests = mapper.Map<List<RoomRest>>(rooms);
+
+            if( roomRests.Count == 0)
             {
-                return NotFound("No rooms.");
+                return NotFound();
             }
-            return Ok(rooms);
+
+            return Ok(roomRests);
         }
 
 
@@ -36,13 +42,17 @@ namespace Booking.WebApi.Controllers
             {
                 return BadRequest();
             }
-            return Ok(room);
+
+            RoomRest roomRest = mapper.Map<RoomRest>(room);
+
+            return Ok(roomRest);
         }
 
 
         [HttpPost]
-        public async Task <IActionResult> PostCreateNewRoom([FromBody] Room newRoom)
+        public async Task <IActionResult> PostCreateNewRoom([FromBody] RoomRest newRoomRest)
         {
+            Room newRoom = mapper.Map<Room>(newRoomRest);
             bool isCreated = await roomService.CreateNewRoom(newRoom);
             if ( !isCreated )
             {

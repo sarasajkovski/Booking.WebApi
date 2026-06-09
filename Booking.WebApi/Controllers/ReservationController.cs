@@ -1,6 +1,8 @@
-﻿using Booking.Common;
-using Booking.Service;
+﻿using AutoMapper;
+using Booking.Common;
 using Booking.Models;
+using Booking.Service;
+using Booking.WebApi.RestModels;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -11,9 +13,11 @@ namespace Booking.WebApi.Controllers
     public class ReservationController : ControllerBase
     {
         protected ReservationService reservationService { get; set; }
-        public ReservationController(ReservationService resService)
+        private IMapper mapper { get; set; }
+        public ReservationController(ReservationService resService, IMapper mapper)
         {
             reservationService = resService;
+            mapper = mapper;
         }
 
         [HttpGet]
@@ -24,7 +28,8 @@ namespace Booking.WebApi.Controllers
             {
                 return NotFound("No reservations.");
             }
-            return Ok(reservations);
+            List<ReservationRest> reservationRests = mapper.Map<List<ReservationRest>>(reservations);
+            return Ok(reservationRests);
         }
 
 
@@ -36,13 +41,16 @@ namespace Booking.WebApi.Controllers
             {
                 return NotFound("There is no reservations.");
             }
+            ReservationRest reservationRest = mapper.Map<ReservationRest>(reservation);
+
             return Ok(reservation);
         }
 
         [HttpPost]
-        public async Task <IActionResult> PostCreateNewReservation([FromBody] Reservation newReservation)
+        public async Task <IActionResult> PostCreateNewReservation([FromBody] ReservationRest newReservationRest)
         {
-           bool isCreated = await reservationService.CreateNewReservation(newReservation);
+            Reservation newReservation = mapper.Map<Reservation>(newReservationRest);
+            bool isCreated = await reservationService.CreateNewReservation(newReservation);
             if ( !isCreated )
             {
                 return BadRequest();
