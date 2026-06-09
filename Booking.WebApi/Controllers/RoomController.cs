@@ -13,10 +13,10 @@ namespace Booking.WebApi.Controllers
     {
         protected IRoomService roomService { get; set; }
         private IMapper mapper { get; set; }
-        public RoomController(IRoomService roomServ, IMapper mapper)
+        public RoomController(IRoomService roomServ, IMapper autoMapper)
         {
             roomService = roomServ;
-            mapper = mapper;
+            mapper = autoMapper;
         }
 
         [HttpGet]
