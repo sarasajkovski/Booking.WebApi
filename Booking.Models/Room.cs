@@ -1,4 +1,4 @@
-namespace Booking.WebApi.Models
+namespace Booking.Models
 {
     public class Room
     {

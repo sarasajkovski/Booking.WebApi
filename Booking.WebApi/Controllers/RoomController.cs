@@ -1,6 +1,6 @@
+using Booking.Common;
 using Booking.Models;
-using Booking.Service;
-using Booking.WebApi.Models;
+using BookingService.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Booking.WebApi.Controllers
@@ -10,7 +10,11 @@ namespace Booking.WebApi.Controllers
     public class RoomController : ControllerBase
     {
 
-        private RoomService roomService = new RoomService();
+        private IRoomService roomService { get; set; }
+        public RoomController(IRoomService roomServ)
+        {
+            roomService = roomServ;
+        }
 
         [HttpGet]
         public async Task <IActionResult> GetAllRoomsAsync([FromQuery] RoomFilter filter)

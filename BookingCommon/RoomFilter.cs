@@ -1,5 +1,5 @@
 ﻿
-namespace Booking.Models
+namespace Booking.Common
 {
     public class RoomFilter
     {

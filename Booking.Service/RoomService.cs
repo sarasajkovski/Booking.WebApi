@@ -1,6 +1,6 @@
-﻿using Booking.Models;
-using Booking.Repository;
-using Booking.WebApi.Models;
+﻿using Booking.Common;
+
+using Booking.Models;
 using BookingService.Common;
 using Repository.Common;
 
@@ -8,35 +8,35 @@ namespace Booking.Service
 {   
     public class RoomService: IRoomService
     {
-        private IRoomRepository roomRepository;
-        public RoomService()
+        protected IRoomRepository RoomRepository { get; set; }
+        public RoomService(IRoomRepository roomRepo)
         {
-            roomRepository = new RoomRepository();
+            RoomRepository = roomRepo;
         }
 
         public async Task<List<Room>> GetAllRoomsAsync(RoomFilter filter)
         {
-            return await roomRepository.GetAllRoomsAsync(filter);
-        }
+            return await RoomRepository.GetAllRoomsAsync(filter);
+        } 
 
         public async Task <Room> GetRoomByIdAsync(int id)
         {
-            return await roomRepository.GetRoomByIdAsync(id);
+            return await RoomRepository.GetRoomByIdAsync(id);
         }
 
         public async Task <bool> CreateNewRoom(Room newRoom)
         {
-            return await roomRepository.CreateNewRoom(newRoom);
+            return await RoomRepository.CreateNewRoom(newRoom);
         }
 
         public async Task <bool> UpdateRoom(int id, Room updatedRoom)
         {
-            return await roomRepository.UpdateRoom(id, updatedRoom);
+            return await RoomRepository.UpdateRoom(id, updatedRoom);
         }
 
         public async Task <bool> DeleteRoom(int id)
         {
-            return await roomRepository.DeleteRoom(id);
+            return await RoomRepository.DeleteRoom(id);
         }
     }
 }

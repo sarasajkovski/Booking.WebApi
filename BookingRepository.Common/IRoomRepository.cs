@@ -1,4 +1,4 @@
-﻿using Booking.WebApi.Models;
+﻿using Booking.Common;
 using Booking.Models;
 
 
@@ -11,6 +11,6 @@ namespace Repository.Common
         Task <bool> UpdateRoom(int id, Room room);
         Task <bool> DeleteRoom(int id);
 
-        Task <List<Room>> GetAllRoomsAsync(RoomFilter filter);
+        Task<List<Room>> GetAllRoomsAsync(RoomFilter filter);
     }
 }

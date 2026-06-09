@@ -1,6 +1,6 @@
 ﻿using System.Text;
+using Booking.Common;
 using Booking.Models;
-using Booking.WebApi.Models;
 using Npgsql;
 using Repository.Common;
 

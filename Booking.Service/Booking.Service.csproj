@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Booking.Models\Booking.Models.csproj" />
     <ProjectReference Include="..\Booking.Repository\Booking.Repository.csproj" />
+    <ProjectReference Include="..\BookingCommon\Booking.Common.csproj" />
     <ProjectReference Include="..\BookingService.Common\BookingService.Common.csproj" />
   </ItemGroup>
 

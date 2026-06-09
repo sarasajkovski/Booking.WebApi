@@ -7,13 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="9.1.0" />
     <PackageReference Include="Npgsql" Version="10.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Booking.Models\Booking.Models.csproj" />
+    <ProjectReference Include="..\Booking.Repository\Booking.Repository.csproj" />
     <ProjectReference Include="..\Booking.Service\Booking.Service.csproj" />
+    <ProjectReference Include="..\BookingCommon\Booking.Common.csproj" />
+    <ProjectReference Include="..\BookingRepository.Common\BookingRepository.Common.csproj" />
+    <ProjectReference Include="..\BookingService.Common\BookingService.Common.csproj" />
   </ItemGroup>
 
 </Project>

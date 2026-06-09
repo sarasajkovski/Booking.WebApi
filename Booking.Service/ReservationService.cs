@@ -1,6 +1,5 @@
-﻿using Booking.Models;
-using Booking.Repository;
-using Booking.WebApi.Models;
+﻿using Booking.Common;
+using Booking.Models;
 using BookingRepository.Common;
 using BookingService.Common;
 
@@ -10,10 +9,10 @@ namespace Booking.Service
     public class ReservationService : IReservationService
     {
 
-        private IReservationRepository reservationRepository;
-        public ReservationService()
+        private IReservationRepository reservationRepository { get; set; }
+        public ReservationService(IReservationRepository reservationRepo)
         {
-            reservationRepository = new ReservationRepository();
+            reservationRepository = reservationRepo;
         }
 
         public async Task <List<Reservation>> GetAllReservationsAsync(ReservationFilter filter)

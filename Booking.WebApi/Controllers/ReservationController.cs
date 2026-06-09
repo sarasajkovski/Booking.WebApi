@@ -1,6 +1,6 @@
-﻿using Booking.Models;
+﻿using Booking.Common;
 using Booking.Service;
-using Booking.WebApi.Models;
+using Booking.Models;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -10,7 +10,11 @@ namespace Booking.WebApi.Controllers
     [Route("[controller]")]
     public class ReservationController : ControllerBase
     {
-        private ReservationService reservationService = new ReservationService();
+        protected ReservationService reservationService { get; set; }
+        public ReservationController(ReservationService resService)
+        {
+            reservationService = resService;
+        }
 
         [HttpGet]
         public async Task <IActionResult> GetAllReservationsAsync([FromQuery] ReservationFilter filter)

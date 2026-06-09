@@ -1,8 +1,9 @@
 ﻿using Booking.Models;
-using Booking.WebApi.Models;
 using Npgsql;
 using System.Text;
 using BookingRepository.Common;
+using Booking.Common;
+
 
 namespace Booking.Repository
 {
@@ -159,5 +160,6 @@ namespace Booking.Repository
 
             return numberOfRowsAffected > 0;
         }
+
     }
 }
